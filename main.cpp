@@ -9,18 +9,32 @@
 int main(void)
 {
     FILE * old = NULL, * nw = NULL;
-    char word[20];
-    int ch = 0;
+    Copy_File(old, nw);
 
-    Copy_To_File(old, nw);
+    int const Num_str = Num_Of_Strings(old);
+    int const Max_len = Max_String_Len(old);
+    printf("Count of strings is %d.\n"
+           "Max count of len is %d.\n"
+           , Num_str, Max_len);
+    int ct = 0, k = 0;
+    char string[Num_str][Max_len];
+    char *point_string[Num_str];
+    nw = fopen("nw.txt", "r");
 
-    assert((nw = fopen("nw.txt", "r")) != NULL);
+    while (ct < Num_str && fgets(string[ct], Max_len, nw) != NULL
+           && string[ct][0] != '\0')
+        {
+            point_string[ct] = string[ct];
+            ct++;
+        }
+    
+    Sorted_Strings (point_string, ct, nw);
 
-    for (int i = 0; i < 2000; i++)
+    fclose(nw);
+
+    for (k = 0; k < ct; k++)
     {
-        fgets(word, 20, nw);
-        printf("%s", word);
+        printf("%s\n", point_string[k]);
     }
-
     return 0;
 }
