@@ -1,67 +1,113 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
-#include "onegin.h"
+#include "text_functions.h"
 
-void Copy_File (FILE * old, FILE * nw)
+void Constructor(struct Text_Info * Onegin)
 {
-    old = fopen("old.txt", "r");
-    nw  = fopen("nw.txt",  "w");
-    int ch = 0;
+    char open_file[]  = "old.txt";
+    Onegin->file_name = open_file;
     
-    while ((ch = getc(old)) != EOF)
+    if ((Onegin->f_onegin = fopen(Onegin->file_name, "r")) == NULL)
     {
-        if (isalpha(ch) || ch == '\n' || ch == ' ')
-        {
-            putc(ch, nw);
-        }
+        fprintf(stderr, "Ошибка. Не удалось открыть файл %s "
+                        "в функции %s в файле %s",
+                        Onegin->file_name, __PRETTY_FUNCTION__, __FILE__);    
     }
-    fclose(old);
-    fclose(nw);
+
+    Num_Str(Onegin);
+
+    /*
+    int ch = 0;
+    while ((ch = getc(Onegin->f_onegin)) != EOF)
+    {
+        putchar(ch);
+    }
+    */
 }
 
-int Num_Of_Strings (FILE * nw)
+void Num_Str(struct Text_Info * Onegin)
 {
-    nw = fopen("nw.txt", "r");
-    int ch = 0, count = 0;
-
-    while ((ch = getc(nw)) != EOF)
+    int ch = 0;
+    while ((ch = getc(Onegin->f_onegin)) != EOF)
     {
         if (ch == '\n')
-        {
-            count++;
-        }
+            Onegin->nstr++;
     }
-    return count;
-    fclose(nw);
+    Onegin->nstr+=1;
+    rewind(Onegin->f_onegin);
 }
 
-int Max_String_Len (FILE * old)
+int Len_Str(struct Text_Info * Onegin, int num_str)
 {
-    int len = 0, ch = 0, max_len = 0;
-    old = fopen("old.txt", "r");
+    return 0;
+}
 
-    while ((ch = getc(old)) != EOF)
+void Read_File(struct Text_Info * Onegin)
+{
+    int str = 0;
+    fseek(Onegin->f_onegin, 0L, SEEK_CUR);
+
+    Onegin->strings = (char **) calloc (Onegin->nstr, sizeof(char*));
+    Onegin->strings[str] = (char *) calloc (Onegin->nstr, sizeof(char));
+
+    while (str < Onegin->nstr)
     {
-        len += (ch != '\n');
-        if (ch == '\n')
-        {
-            if (len > max_len)
-            {
-                max_len = len;
-            }
-            len = 0;
-        }
+        fread(Onegin->strings[str], sizeof(char *), Onegin->nstr, Onegin->f_onegin);
+        printf("%s", Onegin->strings[str]);
+        str++;
     }
-    return max_len;
-    fclose(old);
+
 }
 
 
-void Sorted_Strings (char *strings[], int ch, FILE * nw)
+
+void Destructor(struct Text_Info * Onegin)
+{
+    fclose(Onegin->f_onegin);
+    free(Onegin->strings);
+    free(Onegin->point_array);
+}
+
+
+/*
+int Str_Comporator (const char * s1, const char * s2)
+{
+    if (strcmp(s1, s2) == 0)
+    {
+        return 0;
+    }
+    while (*s1 != '\0' && *s2 != '\0')
+    {
+        if ( !(isalpha(*s1)) )
+            while ( !(isalpha(*s1)) )
+                s1++;
+        if ( !(isalpha(*s2)) )
+            while ( !(isalpha(*s2)) )
+                s2++;
+        if (*s1 == *s2 && isalpha(*s1) && isalpha(*s2))
+        {
+            s1++;
+            s2++;
+        }
+        if (*s1 != *s2 && isalpha(*s1) && isalpha(*s2))
+            break;
+    }
+    return *s1 - *s2;
+}
+*/
+
+
+/*
+// comporator
+// qsort*
+
+void Sorted_Strings (char *strings[], int ch, FILE * nw) // 
 {
     nw = fopen("nw.txt", "r+");
+    //
     int i = 0, j = 0;
     char * temp = 0;
     
@@ -79,3 +125,5 @@ void Sorted_Strings (char *strings[], int ch, FILE * nw)
     }
     fclose(nw);
 }
+
+*/
