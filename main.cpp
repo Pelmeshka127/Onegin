@@ -9,51 +9,33 @@
 int main(void)
 {
     Text_Info Onegin = {
-        .f_open_onegin = NULL,
-        .f_print_onegin = NULL,
+        .input_fonegin = NULL,
+        .out_fonegin = NULL,
         .nstr = 0,
-        .point_array = NULL,
-        .strings = NULL,
+        .nch = 0,
+        .text_string = NULL,
     };
 
-    char s1[] = "Kiril";
-    char s2[] = "Pavlovskiy";
-    printf("MyComp: %d\n"
-           "strcmp: %d\n",
-            Str_Comporator(s1, s2), strcmp(s1, s2));
+    Arr_Struct_Info * Strings = (Arr_Struct_Info *) calloc (Onegin.nstr, sizeof(Arr_Struct_Info));
 
+    char input_file[] = "EugeneOnegin.txt";
+    char out_file[30];
+    puts("Введите название выходного файла");
+    fgets(out_file, 30, stdin);
 
-    Constructor(&Onegin);   ///
+    assert(Constructor(&Onegin, input_file, out_file) == 0);   
 
-    Read_File(&Onegin);
+    assert(Read_File(&Onegin) == 0);
 
-    // close inp
+    Make_Strings(&Onegin, Strings);
 
-    My_Sort(&Onegin);
+    My_Sort(&Onegin, Strings);
 
-    Print_To_File(&Onegin);
+    Make_Out_File(&Onegin, Strings);
 
-    Destructor(&Onegin);
-
-    printf("successed\n");
-
-    /*
-    //
-    struct Text_Info Onegin = {};
-    // ctor 
-    // read_strings
-    // 
-    // sort_onegin()
-    // 
-    // print
-    // dtor 
-    // errno, perror, strerr 
-    // calloc char*
-    // fgetc -> size -> calloc
-    // fseek, rewind
-    // fgets
-    // fread, calloc
-    */
+    puts("Prog finished successfully");
+    
+    Destructor(&Onegin, Strings);
 
     return 0;
 }
