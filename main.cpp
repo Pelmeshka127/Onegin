@@ -10,32 +10,46 @@ int main(void)
 {
     Text_Info Onegin = {
         .input_fonegin = NULL,
-        .out_fonegin = NULL,
-        .nstr = 0,
-        .nch = 0,
+        .sort_fonegin = NULL,
+        .backsort_fonegin = NULL,
         .text_string = NULL,
+        .n_str = 0,
+        .n_symb = 0,
     };
+    
+    char input_file[30];
+    char sortout_file[30];
+    char backsortout_file[30];
+    puts("Enter name of input file");
+    scanf("%s", input_file);
 
-    Arr_Struct_Info * Strings = (Arr_Struct_Info *) calloc (Onegin.nstr, sizeof(Arr_Struct_Info));
+    puts("Enter name of sorted out file");
+    scanf("%s", sortout_file);
 
-    char input_file[] = "EugeneOnegin.txt";
-    char out_file[30];
-    puts("Введите название выходного файла");
-    fgets(out_file, 30, stdin);
+    puts("Enter name of back sorted out file");
+    scanf("%s", backsortout_file);
+    
+    Constructor(&Onegin, input_file, sortout_file, backsortout_file);   
+    
+    Read_File(&Onegin);
 
-    assert(Constructor(&Onegin, input_file, out_file) == 0);   
-
-    assert(Read_File(&Onegin) == 0);
+    Arr_Struct_Info * Strings = (Arr_Struct_Info *) calloc (Onegin.n_str+1, sizeof(Arr_Struct_Info));
 
     Make_Strings(&Onegin, Strings);
 
     My_Sort(&Onegin, Strings);
 
-    Make_Out_File(&Onegin, Strings);
+    Make_Outfile(&Onegin, Strings, Onegin.sort_fonegin);
 
-    puts("Prog finished successfully");
+    //qsort(Strings->string, Onegin.n_str, sizeof(char), Back_Cmp);
     
+    My_Backsort(&Onegin, Strings);
+
+    Make_Outfile(&Onegin, Strings, Onegin.backsort_fonegin);
+
     Destructor(&Onegin, Strings);
+    
+    puts("Prog finished successfully");
 
     return 0;
 }
