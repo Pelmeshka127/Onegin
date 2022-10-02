@@ -40,8 +40,6 @@ int main(void)
     My_Sort(&Onegin, Strings);
 
     Make_Outfile(&Onegin, Strings, Onegin.sort_fonegin);
-
-    //qsort(Strings->string, Onegin.n_str, sizeof(char), Back_Cmp);
     
     My_Backsort(&Onegin, Strings);
 
