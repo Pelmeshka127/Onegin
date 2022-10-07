@@ -1,46 +1,49 @@
 #ifndef TEXT_FUNCTIONS_H_
 #define TEXT_FUNCTIONS_H_
 
-struct Text_Info {
-    FILE * input_fonegin, * sort_fonegin, * backsort_fonegin;
-    char * text_string;
-    unsigned long n_str, n_symb;
-};
-
 struct Arr_Struct_Info {
     char * string;
     int len_str;
 };
 
-/// function compares two strings
-int Str_Comporator(const char * s1, const char * s2);
+struct Text_Info {
+    char * text_string;
+    unsigned long n_str, n_symb;
+    Arr_Struct_Info * strings;
+};
 
-///
-int Back_Cmp(const void * p1, const void * p2);
+/// function compares two strings in alphabetical ordee
+int Right_LexCmp(const void * s1, const void * s2);
 
-/// function opens files
-int Constructor(struct Text_Info * Onegin, char * input_file,
-                char * sortout_file, char * backsortout_file);
+/// function compares two strings in reverse alphabetical order
+int Back_LexCmp(const void * p1, const void * p2);
+
+/// function checks opened files
+void Onegin_Ctor(struct Text_Info * Onegin, FILE *, FILE *, FILE *, FILE *, 
+                char *, char *, char *, char *);
 
 /// function reads input file
-int Read_File(struct Text_Info * Onegin);
+int Onegin_Read(struct Text_Info * Onegin, FILE *);
+
+/// functions finds out the number of symbols in file
+int Num_Symb(FILE *, struct Text_Info * Onegin);
+
+/// functions finds out the number of strings in file
+int Num_Str(FILE *, struct Text_Info * Onegin);
 
 /// function make strings from input file
-int Make_Strings(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings);
+void MakeStrings(struct Text_Info * Onegin);
 
-/// function sortes strings from input file
-int My_Sort(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings);
-
-/// functions sortes strings in reverse order
-int My_Backsort(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings);
+/// functions sorts file using string comporator
+void Onegin_Sort(struct Text_Info * Onegin, int Comp(const void *, const void *));
 
 /// function swaps strings
-int Onegin_Swap(struct Arr_Struct_Info * Strings, int i_elem, int j_elem);
+void Onegin_Swap(struct Text_Info * Onegin, int i_elem, int j_elem);
 
 /// function writes strings to the out file 
-int Make_Outfile(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings, FILE * fp);
+void Onegin_MakeOutfile(struct Text_Info * Onegin, FILE * fp);
 
 /// function closes files and clear dedicated memory
-void Destructor(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings);
+void Onegin_Dtor(struct Text_Info * Onegin);
 
 #endif
