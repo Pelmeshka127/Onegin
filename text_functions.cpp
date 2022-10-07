@@ -8,8 +8,11 @@
 #include "text_functions.h"
 
 
-int Str_Comporator(const char * s1, const char * s2)
+int Right_LexCmp(const void * p1, const void * p2)
 {
+    const char * s1 = (const char *) p1;
+    const char * s2 = (const char *) p2;
+
     while (*s1 != '\0' && *s2 != '\0')
     {
         while (*s1 != 0 &&  !(isalpha(*s1)) )
@@ -34,11 +37,11 @@ int Str_Comporator(const char * s1, const char * s2)
             break;
         }
     }
-    return *s1 - *s2;
+    return *s2 - *s1;
 }
 
 
-int Back_Cmp(const void * p1, const void * p2)
+int Back_LexCmp(const void * p1, const void * p2)
 {
     const char * s1 = (const char *) p1;
     const char * s2 = (const char *) p2;
@@ -91,78 +94,113 @@ int Back_Cmp(const void * p1, const void * p2)
 }
 
 
-int Constructor(struct Text_Info * Onegin, char * input_file,
-                char * sortout_file, char * backsortout_file)
+void Onegin_Ctor(struct Text_Info * Onegin, FILE * input_file, FILE * sortout_file,
+                FILE * backsortout_file, FILE * res_file, char * file1, char * file2, 
+                char * file3, char * file4)
 {
-    if ((Onegin->input_fonegin = fopen(input_file, "r")) == NULL)
+    if (input_file == NULL)
     {
         fprintf(stderr, "In function %s\n"
                         "Error openning file %s: %s\n", 
-                        __PRETTY_FUNCTION__, input_file, strerror(errno));
-        return -1;    
+                        __PRETTY_FUNCTION__, file1, strerror(errno));   
     }
 
-    if ((Onegin->sort_fonegin = fopen(sortout_file, "w+")) == NULL)
+    if (sortout_file == NULL)
     {
         fprintf(stderr, "In function %s\n"
                         "Error openning file %s: %s\n", 
-                        __PRETTY_FUNCTION__, sortout_file, strerror(errno));
+                        __PRETTY_FUNCTION__, file2, strerror(errno));
 
+    }
+
+    if (backsortout_file == NULL)
+    {
+        fprintf(stderr, "In function %s\n"
+                        "Error openning file %s: %s\n", 
+                        __PRETTY_FUNCTION__, file3, strerror(errno));   
+    }
+
+    if (res_file == NULL)
+    {
+        fprintf(stderr, "In function %s\n"
+                        "Error openning file %s: %s\n", 
+                        __PRETTY_FUNCTION__, file4, strerror(errno));  
+    }
+}
+
+
+int Onegin_Read(struct Text_Info * Onegin, FILE * input_file)
+{
+    Num_Symb(input_file, Onegin);
+
+    Onegin->text_string = (char *) calloc (Onegin->n_symb + 1, sizeof(char));
+
+    if (fread(Onegin->text_string, sizeof(char), 
+                      Onegin->n_symb + 1, input_file) < Onegin->n_str)
+    {
+        fprintf(stderr, "Error in function %s, %d: %s\n",
+                __PRETTY_FUNCTION__, __LINE__, strerror(errno));
         return -1;
     }
 
-    if ((Onegin->backsort_fonegin = fopen(backsortout_file, "w+")) == NULL)
+    Num_Str(input_file, Onegin);
+
+    MakeStrings(Onegin);
+
+    if (Onegin->n_str == 0 || Onegin->n_symb == 0)
     {
-        fprintf(stderr, "In function %s\n"
-                        "Error openning file %s: %s\n", 
-                        __PRETTY_FUNCTION__, backsortout_file, strerror(errno));
-        return -1;      
+        fprintf(stderr, "Error in fucntion %s, %d: %s\n",
+                __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+        return -1;
     }
+
+    if (Onegin->strings == NULL)
+    {
+        fprintf(stderr, "Error in function %s, %d: %s\n",
+                __PRETTY_FUNCTION__, __LINE__, strerror(errno));
+        return -1;
+    }
+
     return 0;
 }
 
 
-int Read_File(struct Text_Info * Onegin)
+int Num_Symb(FILE * fp, struct Text_Info * Onegin)
 {
-    fseek(Onegin->input_fonegin, 0L, SEEK_END);
-    Onegin->n_symb = ftell(Onegin->input_fonegin);   
-    rewind(Onegin->input_fonegin);
-
-    Onegin->text_string = (char *) calloc (Onegin->n_symb + 1, sizeof(char));
-
-    fread(Onegin->text_string, sizeof(char), Onegin->n_symb + 1, 
-    Onegin->input_fonegin);
-
-    int elem = 0;
-    while (elem < Onegin->n_symb)
+    if (fseek(fp, 0L, SEEK_END) == -1)
     {
-        if (Onegin->text_string[elem] == '\n')
-        {
-            Onegin->n_str++;
-        }
-        elem++;
-    }
-    Onegin->n_str/=2;
-
-    if (Onegin->n_str != 0 && Onegin->n_symb != 0)
-    {
-        return 0;
-    }
-    else
-    {
-        fprintf(stderr, "Ошибка при записи данных файла \n"
-                        "количество символов в файле равно: :%lu\n"
-                        "количество строк в файле равно: :%lu\n",
-                        Onegin->n_symb, Onegin->n_str);
-
+        fprintf(stderr, "Error in function %s: %s\n", __PRETTY_FUNCTION__, strerror(errno));
         return -1;
     }
+    Onegin->n_symb = ftell(fp);   
+    rewind(fp);
+    return 0;
 }
 
 
-
-int Make_Strings(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings)
+int Num_Str(FILE * fp, struct Text_Info * Onegin)
 {
+    int cur_ch = 0;
+    while (cur_ch < Onegin->n_symb)
+    {
+        if (Onegin->text_string[cur_ch] == '\n')
+        {
+            Onegin->n_str++;
+        }
+        cur_ch++;
+    }
+    return Onegin->n_str;
+}
+
+
+void MakeStrings(struct Text_Info * Onegin)
+{
+    if ((Onegin->strings = (Arr_Struct_Info *) calloc 
+        (Onegin->n_str+1, sizeof(Arr_Struct_Info))) == NULL)
+    {
+        fprintf(stderr, "Error in function %s: %s\n", __PRETTY_FUNCTION__, strerror(errno));
+    }
+    
     int ch = 0, cur_len = 0, num_str = 0;
     while (num_str < Onegin->n_str)
     {
@@ -172,86 +210,49 @@ int Make_Strings(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings)
         {
             Onegin->text_string[ch] = '\0';
 
-            Strings[num_str].len_str = cur_len;
-            Strings[num_str].string = &Onegin->text_string[ch - cur_len];
+            Onegin->strings[num_str].len_str = cur_len;
+            Onegin->strings[num_str].string = &Onegin->text_string[ch - cur_len];
 
             num_str++;
             cur_len = 0;
-            ch+=2;
+            ch+=1;
         }
     }
-    return 0;
 }
 
-int My_Sort(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings)
+void Onegin_Sort(struct Text_Info * Onegin, int Comporator(const void *, const void *))
 {
-    int i_elem = 0, j_elem = 0;
-
-    for (i_elem = 0; i_elem < Onegin->n_str - 1; i_elem++)
-    {
-        for (j_elem = i_elem + 1; j_elem < Onegin->n_str; j_elem++)
-        {
-            if (Str_Comporator(Strings[i_elem].string, Strings[j_elem].string) > 0)
-            {
-                Onegin_Swap(Strings, i_elem, j_elem);
-            }
-        }
-    }
-    return 0; 
+    for (int i_elem = 0; i_elem < Onegin->n_str - 1; i_elem++)
+        for (int j_elem = i_elem + 1; j_elem < Onegin->n_str; j_elem++)
+            if (Comporator(Onegin->strings[i_elem].string, Onegin->strings[j_elem].string) < 0)
+                Onegin_Swap(Onegin, i_elem, j_elem);
 }
 
-int My_Backsort(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings)
-{
-    int i_elem = 0, j_elem = 0;
-
-    for (i_elem = 0; i_elem < Onegin->n_str - 1; i_elem++)
-    {
-        for (j_elem = i_elem + 1; j_elem < Onegin->n_str; j_elem++)
-        {
-            if (Back_Cmp(Strings[i_elem].string, Strings[j_elem].string) < 0)
-            {
-                Onegin_Swap(Strings, i_elem, j_elem);
-            }
-        }
-    }
-    return 0; 
-}
-
-int Onegin_Swap(struct Arr_Struct_Info * Strings, int i_elem, int j_elem)
+void Onegin_Swap(struct Text_Info * Onegin, int i_elem, int j_elem)
 {
     char * temp_str = 0;
     int temp_len = 0;
 
-    temp_str = Strings[i_elem].string;
-    temp_len = Strings[i_elem].len_str;
+    temp_str = Onegin->strings[i_elem].string;
+    temp_len = Onegin->strings[i_elem].len_str;
 
-    Strings[i_elem].string = Strings[j_elem].string;
-    Strings[i_elem].len_str = Strings[j_elem].len_str;
+    Onegin->strings[i_elem].string = Onegin->strings[j_elem].string;
+    Onegin->strings[i_elem].len_str = Onegin->strings[j_elem].len_str;
 
-    Strings[j_elem].string = temp_str;
-    Strings[j_elem].len_str = temp_len;
-
-    return 0;
+    Onegin->strings[j_elem].string = temp_str;
+    Onegin->strings[j_elem].len_str = temp_len;
 }
 
 
-int Make_Outfile(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings, FILE * fp)
+void Onegin_MakeOutfile(struct Text_Info * Onegin, FILE * fp)
 {
-    int i = 0;
-    while (i < Onegin->n_str)
-    {
-        fwrite(Strings[i].string, sizeof(char), Strings[i].len_str, fp);
-        i++;
-    }
-    return 0;
+    for (int cur_str = 0; cur_str < Onegin->n_str; cur_str++)
+        fprintf(fp, "%s", Onegin->strings[cur_str].string);
 }
 
 
-void Destructor(struct Text_Info * Onegin, struct Arr_Struct_Info * Strings)
+void Onegin_Dtor(struct Text_Info * Onegin)
 {
-    fclose(Onegin->input_fonegin);
-    fclose(Onegin->sort_fonegin);
-    fclose(Onegin->backsort_fonegin);
-    free(Strings);
+    free(Onegin->strings);
     free(Onegin->text_string);
 }
