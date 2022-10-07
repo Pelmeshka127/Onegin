@@ -1,6 +1,6 @@
-all: task1
+all: create_res_file
 
-task1: main.o text_functions.o
+create_res_file: main.o text_functions.o
 	g++ main.o text_functions.o -o onegin
 
 main.o: main.cpp
@@ -12,11 +12,4 @@ text_processing.o: text_functions.cpp
 .PHONY: clean
 
 clean:
-	rm *.o onegin
-
-
-
-
-
-
-
+	rm *.o exec
