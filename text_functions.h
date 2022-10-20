@@ -1,7 +1,13 @@
 #ifndef TEXT_FUNCTIONS_H_
 #define TEXT_FUNCTIONS_H_
 
-struct Arr_Struct_Info {
+#define C_QSORT 1
+
+#define MY_QSORT 2
+
+#define SORT_TYPE 1
+
+struct Onegin_Line_Info {
     char * string;
     int len_str;
 };
@@ -9,39 +15,41 @@ struct Arr_Struct_Info {
 struct Text_Info {
     char * text_string;
     unsigned long n_str, n_symb;
-    Arr_Struct_Info * strings;
+    Onegin_Line_Info * Strings;
 };
 
-/// function compares two strings in alphabetical ordee
-int Right_LexCmp(const void * s1, const void * s2);
+#define ONEGIN_ERROR() \
+fprintf(stderr, "There is an error in %s, in %d: %s\n", \
+        __PRETTY_FUNCTION__, __LINE__, strerror(errno))
 
-/// function compares two strings in reverse alphabetical order
-int Back_LexCmp(const void * p1, const void * p2);
+enum Onegin_Coderr {
+    Cmdline_Error = 1,
+    File_Is_Missed = 2,
+    Reading_File_Error = 3,
+    Making_Str_Error = 4,
+    Alloc_Error = 5,
+};
 
-/// function checks opened files
-void Onegin_Ctor(struct Text_Info * Onegin, FILE *, FILE *, FILE *, FILE *, 
-                char *, char *, char *, char *);
+/// function compares two strings
+int Direct_Lex_Cmp(const void * s1, const void * s2);
+
+/// functions compares two strings in reverse alphabetical order
+int Reverse_Lex_Cmp(const void * p1, const void * p2);
+
+/// function checks command lines argument
+int Check_Cmdline_Arg(int argc);
 
 /// function reads input file
 int Onegin_Read(struct Text_Info * Onegin, FILE *);
 
-/// functions finds out the number of symbols in file
-int Num_Symb(FILE *, struct Text_Info * Onegin);
-
-/// functions finds out the number of strings in file
-int Num_Str(FILE *, struct Text_Info * Onegin);
-
-/// function make strings from input file
-void MakeStrings(struct Text_Info * Onegin);
-
 /// functions sorts file using string comporator
 void Onegin_Sort(struct Text_Info * Onegin, int Comp(const void *, const void *));
 
-/// function swaps strings
-void Onegin_Swap(struct Text_Info * Onegin, int i_elem, int j_elem);
+/// functions sorts file using quick sort with string comporator
+void Onegin_Qsort(struct Text_Info * Onegin, int first, int last, int Comp (const void *, const void *));
 
 /// function writes strings to the out file 
-void Onegin_MakeOutfile(struct Text_Info * Onegin, FILE * fp);
+void Onegin_Print_To_File(struct Text_Info * Onegin, FILE * fp);
 
 /// function closes files and clear dedicated memory
 void Onegin_Dtor(struct Text_Info * Onegin);
