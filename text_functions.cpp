@@ -26,6 +26,9 @@ static int Make_Strings(struct Text_Info * Onegin);
 /// function swaps strings
 static void Onegin_Swap(struct Text_Info * Onegin, int i_elem, int j_elem);
 
+/// function swaps strings
+static void Onegin_Swap(struct Text_Info * Onegin, int i_elem, int j_elem)
+
 
 int Direct_Lex_Cmp(const void * p1, const void * p2)
 {
@@ -168,7 +171,7 @@ void Onegin_Qsort(struct Text_Info * Onegin, int first, int last, int Comporator
 
             if (left <= right)
             {
-                Onegin_Swap(Onegin, left, right);
+                New_Onegin_Swap(&Onegin->Strings[left], &Onegin->Strings[right], sizeof(Onegin_Line_Info));
                 left++;
                 right--;
             }
@@ -280,4 +283,72 @@ static void Onegin_Swap(struct Text_Info * Onegin, int i_elem, int j_elem)
     Onegin->Strings[i_elem] = Onegin->Strings[j_elem];
 
     Onegin->Strings[j_elem] = Temp;
+}
+
+
+
+static void New_Onegin_Swap(void * first, void * second, size_t size)
+{
+    char * first_ptr = (char *) first;
+    char * second_ptr = (char *) second;
+
+    while (size >= sizeof(uint64_t))
+    {
+        uint64_t temp = *((uint64_t *) first_ptr);
+
+        *((uint64_t *) first_ptr) = *((uint64_t *) second_ptr);
+
+        *((uint64_t *) second_ptr) = temp;
+
+        first_ptr += sizeof(uint64_t);
+
+        second_ptr += sizeof(uint64_t);
+
+        size -= sizeof(uint64_t);
+    }
+
+    while (size >= sizeof(uint32_t))
+    {
+        uint32_t temp = *((uint32_t *) first_ptr);
+
+        *((uint32_t *) first_ptr) = *((uint32_t *) second_ptr);
+
+        *((uint32_t *) second_ptr) = temp;
+
+        first_ptr += sizeof(uint32_t);
+
+        second_ptr += sizeof(uint32_t);
+
+        size -= sizeof(uint32_t);
+    }
+
+    while (size >= sizeof(uint16_t))
+    {
+        uint16_t temp = *((uint16_t *) first_ptr);
+
+        *((uint16_t *) first_ptr) = *((uint16_t *) second_ptr);
+
+        *((uint16_t *) second_ptr) = temp;
+
+        first_ptr += sizeof(uint16_t);
+
+        second_ptr += sizeof(uint16_t);
+
+        size -= sizeof(uint16_t);
+    }
+
+    while (size >= sizeof(uint8_t))
+    {
+        uint8_t temp = *((uint8_t *) first_ptr);
+
+        *((uint8_t *) first_ptr) = *((uint8_t *) second_ptr);
+
+        *((uint8_t *) second_ptr) = temp;
+
+        first_ptr += sizeof(uint8_t);
+
+        second_ptr += sizeof(uint8_t);
+
+        size -= sizeof(uint8_t);
+    }
 }
